@@ -3,7 +3,6 @@
 poc of CVE-2022-46689 written purely in swift
 
 ## Supported:
-- macOS 13.0-13.0.1, 12.0-12.6.1
 - iOS 16.0-16.1.2, 15.7.1 and below
 - watchOS 9.1 and below (untested)
 - tvOS 16.1.1 and below (untested)
@@ -11,12 +10,6 @@ poc of CVE-2022-46689 written purely in swift
 
 *dont use this is its unstable, not my fault if your device gets damaged*
 
-## Building (macOS)
-```bash
-git clone https://github.com/staturnzz/sw1tch.git
-cd sw1tch
-make all
-```
 
 ## Building (*OS)
 - open xcode project
